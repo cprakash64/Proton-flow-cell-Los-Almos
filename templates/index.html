@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proton</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Chart.js for performance graph -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-broadcast-tower"></i>
+            </div>
+            <h1>Proton</h1>
+        </div>
+        <div class="header-controls">
+            <div class="time-display">
+                <i class="fas fa-clock"></i>
+                <span id="current-time">00:00:00</span>
+            </div>
+            <nav class="main-nav">
+                <a href="{{ url_for('index') }}" class="nav-btn active">
+                    <i class="fas fa-eye"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('analytics') }}" class="nav-btn">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="{{ url_for('history') }}" class="nav-btn">History</a>
+                <a href="{{ url_for('settings') }}" class="nav-btn">Settings</a>
+            </nav>
+        </div>
+    </header>
+    <!-- Main Content -->
+    <main class="container">
+        <div class="dashboard-header">
+            <h2>Flow Cell Monitoring Dashboard</h2>
+            <p>Real-time monitoring and analysis of flow cell performance</p>
+        </div>
+        <div class="dashboard-grid">
+            <!-- Left Column - Camera Feed -->
+            <div class="left-column">
+                <div class="camera-card">
+                    <div class="card-header">
+                        <div class="live-indicator">
+                            <div class="pulse-dot"></div>
+                            <h3>Live Camera Feed</h3>
+                        </div>
+                        <span class="update-time" id="camera-update-time">Updated at 00:00:00</span>
+                    </div>
+                    <div class="camera-container">
+                        <div class="status-overlay fail" id="overall-status-overlay">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span id="overall-status-text">Overall: FAIL</span>
+                        </div>
+                        <div class="status-overlay success" id="overflow-status-overlay">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="overflow-status-text">Overflow: Normal</span>
+                        </div>
+                        <!-- This is where your camera feed would go -->
+                        <img id="camera-feed" src="{{ url_for('video_feed') }}" alt="Camera feed" class="camera-feed">
+                    </div>
+                </div>
+                
+                <!-- Additional Analytics or Charts -->
+                <div class="metrics-grid">
+                    <div class="metrics-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-line"></i>
+                            Performance Metrics
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="metrics-card">
+                        <h3 class="card-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Recent Alerts
+                        </h3>
+                        <div class="alerts-container">
+                            {% if recent_alerts %}
+                                {% for alert in recent_alerts %}
+                                <div class="alert-item {{ alert.type }}">
+                                    <div class="alert-title">{{ alert.title }}</div>
+                                    <div class="alert-time">{{ alert.time }}</div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="alert-item error">
+                                    <div class="alert-title">Flow Cell Holes Not Detected</div>
+                                    <div class="alert-time">2 minutes ago</div>
+                                </div>
+                                <div class="alert-item warning">
+                                    <div class="alert-title">Flaps Closed</div>
+                                    <div class="alert-time">5 minutes ago</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Column - Status and Sensors -->
+            <div class="right-column">
+                <!-- System Status Card -->
+                <div class="status-card">
+                    <div class="card-header dark">
+                        <h3>
+                            <i class="fas fa-broadcast-tower"></i>
+                            System Status
+                        </h3>
+                    </div>
+                    <div class="status-display">
+                        <div class="status-indicator fail" id="system-status-indicator">
+                            <span id="system-status-text">FAIL</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Component Status Card -->
+                <div class="component-card">
+                    <div class="card-header">
+                        <h3>Component Status</h3>
+                    </div>
+                    <div class="component-list">
+                        <div class="component-item" data-component="flow-cell-holes">
+                            <div class="component-name">
+                                <div class="component-icon error">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <span>Flow Cell Holes</span>
+                            </div>
+                            <span class="component-status error" id="flow-cell-holes-status">Not Detected</span>
+                        </div>
+                        
+                        <div class="component-item" data-component="pipette">
+                            <div class="component-name">
+                                <div class="component-icon success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <span>Pipette</span>
+                            </div>
+                            <span class="component-status success" id="pipette-status">Detected</span>
+                        </div>
+                        
+                        <div class="component-item" data-component="flaps">
+                            <div class="component-name">
+                                <div class="component-icon warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <span>Flaps</span>
+                            </div>
+                            <span class="component-status warning" id="flaps-status">Closed</span>
+                        </div>
+                        
+                        <div class="component-item" data-component="overflow">
+                            <div class="component-name">
+                                <div class="component-icon success">
+                                    <i class="fas fa-tint"></i>
+                                </div>
+                                <span>Overflow</span>
+                            </div>
+                            <span class="component-status success" id="overflow-status">Normal</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sensor Readings Card -->
+                <div class="sensor-card">
+                    <div class="card-header">
+                        <h3>Sensor Readings</h3>
+                    </div>
+                    <div class="sensor-list">
+                        <!-- Temperature Sensor -->
+                        <div class="sensor-item" data-sensor="temperature">
+                            <div class="sensor-header">
+                                <div class="sensor-name">
+                                    <i class="fas fa-thermometer-half"></i>
+                                    <span>Temperature</span>
+                                </div>
+                                <div class="sensor-value">
+                                    <span class="value" id="temperature-value">24.3</span>
+                                    <span class="unit">°C</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-value temp" id="temperature-progress" data-percentage="48"></div>
+                            </div>
+                            <div class="range-values">
+                                <span>Min: <span id="temperature-min">15</span>°C</span>
+                                <span>Max: <span id="temperature-max">35</span>°C</span>
+                            </div>
+                        </div>
+                        <!-- Pressure Sensor -->
+                        <div class="sensor-item" data-sensor="pressure">
+                            <div class="sensor-header">
+                                <div class="sensor-name">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Pressure</span>
+                                </div>
+                                <div class="sensor-value">
+                                    <span class="value" id="pressure-value">101.3</span>
+                                    <span class="unit">kPa</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-value pressure" id="pressure-progress" data-percentage="65"></div>
+                            </div>
+                            <div class="range-values">
+                                <span>Min: <span id="pressure-min">95</span> kPa</span>
+                                <span>Max: <span id="pressure-max">105</span> kPa</span>
+                            </div>
+                        </div>
+                        <!-- Motion Sensor -->
+                        <div class="sensor-item" data-sensor="motion">
+                            <div class="sensor-header">
+                                <div class="sensor-name">
+                                    <i class="fas fa-running"></i>
+                                    <span>Motion</span>
+                                </div>
+                                <div class="sensor-value">
+                                    <span class="value" id="motion-value">0.3</span>
+                                    <span class="unit">mm/s</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-value motion" id="motion-progress" data-percentage="15"></div>
+                            </div>
+                            <div class="range-values">
+                                <span>Min: <span id="motion-min">0</span> mm/s</span>
+                                <span>Max: <span id="motion-max">2</span> mm/s</span>
+                            </div>
+                        </div>
+                        <!-- Ultrasonic Sensor -->
+                        <div class="sensor-item" data-sensor="ultrasonic">
+                            <div class="sensor-header">
+                                <div class="sensor-name">
+                                    <i class="fas fa-broadcast-tower"></i>
+                                    <span>Ultrasonic</span>
+                                </div>
+                                <div class="sensor-value">
+                                    <span class="value" id="ultrasonic-value">45.7</span>
+                                    <span class="unit">mm</span>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-value ultrasonic" id="ultrasonic-progress" data-percentage="75"></div>
+                            </div>
+                            <div class="range-values">
+                                <span>Min: <span id="ultrasonic-min">10</span> mm</span>
+                                <span>Max: <span id="ultrasonic-max">60</span> mm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Hidden data element to store server-provided values -->
+    <div id="server-data" style="display:none;"
+        data-flow-cell-holes="{{ flow_cell_holes_status|default('Not Detected') }}"
+        data-pipette="{{ pipette_status|default('Detected') }}"
+        data-flaps="{{ flaps_status|default('Closed') }}"
+        data-overflow="{{ overflow_status|default('Normal') }}"
+        data-system-status="{{ system_status|default('FAIL') }}"
+        data-overall-status="{{ overall_status|default('FAIL') }}"
+        
+        data-temperature-value="{{ temperature_value|default('24.3') }}"
+        data-temperature-min="{{ temperature_min|default('15') }}"
+        data-temperature-max="{{ temperature_max|default('35') }}"
+        data-temperature-percentage="{{ temperature_percentage|default('48') }}"
+        
+        data-pressure-value="{{ pressure_value|default('101.3') }}"
+        data-pressure-min="{{ pressure_min|default('95') }}"
+        data-pressure-max="{{ pressure_max|default('105') }}"
+        data-pressure-percentage="{{ pressure_percentage|default('65') }}"
+        
+        data-motion-value="{{ motion_value|default('0.3') }}"
+        data-motion-min="{{ motion_min|default('0') }}"
+        data-motion-max="{{ motion_max|default('2') }}"
+        data-motion-percentage="{{ motion_percentage|default('15') }}"
+        
+        data-ultrasonic-value="{{ ultrasonic_value|default('45.7') }}"
+        data-ultrasonic-min="{{ ultrasonic_min|default('10') }}"
+        data-ultrasonic-max="{{ ultrasonic_max|default('60') }}"
+        data-ultrasonic-percentage="{{ ultrasonic_percentage|default('75') }}"
+    ></div>
+    
+    <script>
+    // Define default performance data
+    const defaultPerformanceData = {
+        labels: ["00:00", "00:01", "00:02", "00:03", "00:04", "00:05", "00:06", "00:07", "00:08", "00:09"],
+        flowRate: [75, 78, 80, 76, 75, 77, 81, 83, 79, 80],
+        pressure: [101.2, 101.3, 101.1, 101.4, 101.5, 101.2, 101.1, 101.3, 101.4, 101.3],
+        temperature: [24.1, 24.2, 24.3, 24.1, 24.0, 24.2, 24.3, 24.4, 24.2, 24.3]
+    };
+    
+    // Get performance data from server or use default
+    var performanceData = defaultPerformanceData;
+    </script>
+    
+    {% if performance_data is defined %}
+    <script>
+    performanceData = JSON.parse('{{ performance_data|tojson|safe }}');
+    </script>
+    {% endif %}
+    
+    <script>
+    // Apply server-side data to DOM elements
+    document.addEventListener('DOMContentLoaded', function() {
+        const serverData = document.getElementById('server-data');
+        
+        // Apply component status from server
+        document.getElementById('flow-cell-holes-status').textContent = serverData.dataset.flowCellHoles;
+        document.getElementById('pipette-status').textContent = serverData.dataset.pipette;
+        document.getElementById('flaps-status').textContent = serverData.dataset.flaps;
+        document.getElementById('overflow-status').textContent = serverData.dataset.overflow;
+        document.getElementById('system-status-text').textContent = serverData.dataset.systemStatus;
+        document.getElementById('overall-status-text').textContent = "Overall: " + serverData.dataset.overallStatus;
+        
+        // Apply sensor values from server
+        document.getElementById('temperature-value').textContent = serverData.dataset.temperatureValue;
+        document.getElementById('temperature-min').textContent = serverData.dataset.temperatureMin;
+        document.getElementById('temperature-max').textContent = serverData.dataset.temperatureMax;
+        
+        document.getElementById('pressure-value').textContent = serverData.dataset.pressureValue;
+        document.getElementById('pressure-min').textContent = serverData.dataset.pressureMin;
+        document.getElementById('pressure-max').textContent = serverData.dataset.pressureMax;
+        
+        document.getElementById('motion-value').textContent = serverData.dataset.motionValue;
+        document.getElementById('motion-min').textContent = serverData.dataset.motionMin;
+        document.getElementById('motion-max').textContent = serverData.dataset.motionMax;
+        
+        document.getElementById('ultrasonic-value').textContent = serverData.dataset.ultrasonicValue;
+        document.getElementById('ultrasonic-min').textContent = serverData.dataset.ultrasonicMin;
+        document.getElementById('ultrasonic-max').textContent = serverData.dataset.ultrasonicMax;
+        
+        // Apply percentage values to progress bars (using JavaScript instead of inline styles)
+        document.getElementById('temperature-progress').style.width = serverData.dataset.temperaturePercentage + '%';
+        document.getElementById('pressure-progress').style.width = serverData.dataset.pressurePercentage + '%';
+        document.getElementById('motion-progress').style.width = serverData.dataset.motionPercentage + '%';
+        document.getElementById('ultrasonic-progress').style.width = serverData.dataset.ultrasonicPercentage + '%';
+        
+        // Set up chart
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: performanceData.labels,
+                datasets: [{
+                    label: 'Flow Rate',
+                    data: performanceData.flowRate,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Pressure',
+                    data: performanceData.pressure,
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Temperature',
+                    data: performanceData.temperature,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+        
+        // Update the chart data periodically
+        setInterval(() => {
+            // Remove the oldest data point from each dataset
+            chart.data.labels.shift();
+            chart.data.datasets.forEach((dataset) => {
+                dataset.data.shift();
+            });
+            
+            // Add new time label
+            const now = new Date();
+            chart.data.labels.push(now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }));
+            
+            // Add new random data points based on last values
+            const lastFlowRate = chart.data.datasets[0].data[chart.data.datasets[0].data.length - 1];
+            const lastPressure = chart.data.datasets[1].data[chart.data.datasets[1].data.length - 1];
+            const lastTemperature = chart.data.datasets[2].data[chart.data.datasets[2].data.length - 1];
+            
+            // Add new random points with realistic variations
+            chart.data.datasets[0].data.push(Math.max(70, Math.min(90, lastFlowRate + (Math.random() * 4 - 2))));
+            chart.data.datasets[1].data.push(Math.max(95, Math.min(105, lastPressure + (Math.random() * 0.4 - 0.2))));
+            chart.data.datasets[2].data.push(Math.max(15, Math.min(35, lastTemperature + (Math.random() * 0.4 - 0.2))));
+            
+            // Update the chart
+            chart.update();
+        }, 5000);
+        
+        // Update time function
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        // Update time every second
+        setInterval(updateTime, 1000);
+        updateTime(); // Initial call
+    });
+    </script>
+    
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuelCell Monitor - History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-broadcast-tower"></i>
+            </div>
+            <h1>FuelCell Monitor</h1>
+        </div>
+        <div class="header-controls">
+            <div class="time-display">
+                <i class="fas fa-clock"></i>
+                <span id="current-time">00:00:00</span>
+            </div>
+            <nav class="main-nav">
+                <a href="{{ url_for('index') }}" class="nav-btn">
+                    <i class="fas fa-eye"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('analytics') }}" class="nav-btn">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="{{ url_for('history') }}" class="nav-btn active">History</a>
+                <a href="{{ url_for('settings') }}" class="nav-btn">Settings</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="dashboard-header">
+            <h2>System History & Event Log</h2>
+            <p>Chronological record of system events and process outcomes</p>
+        </div>
+
+        <!-- History Controls -->
+        <div class="history-controls">
+            <div class="filter-card">
+                <div class="filter-body">
+                    <div class="filter-row">
+                        <div class="search-group">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" placeholder="Search events..." class="search-input">
+                        </div>
+                        <div class="filter-group">
+                            <label for="eventType">Event Type:</label>
+                            <select id="eventType" class="filter-select">
+                                <option value="all" selected>All Events</option>
+                                <option value="error">Errors</option>
+                                <option value="warning">Warnings</option>
+                                <option value="status">Status Changes</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="date-group compact">
+                            <label for="dateRange">Date Range:</label>
+                            <input type="date" id="dateRange" class="date-input">
+                        </div>
+                        <button class="filter-button">Filter</button>
+                        <button class="export-button">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Timeline -->
+        <div class="timeline-container">
+            <div class="timeline-header">
+                <div class="timeline-col timestamp">Timestamp</div>
+                <div class="timeline-col event-type">Event Type</div>
+                <div class="timeline-col component">Component</div>
+                <div class="timeline-col description">Description</div>
+                <div class="timeline-col status">Status</div>
+                <div class="timeline-col actions">Actions</div>
+            </div>
+            
+            <!-- Event Entries -->
+            <div class="timeline-body">
+                <!-- Event 1 -->
+                <div class="timeline-row">
+                    <div class="timeline-col timestamp">
+                        <div class="date">2023-12-15</div>
+                        <div class="time">09:45:12</div>
+                    </div>
+                    <div class="timeline-col event-type">
+                        <span class="event-badge error">Error</span>
+                    </div>
+                    <div class="timeline-col component">Fuel Cell Holes</div>
+                    <div class="timeline-col description">Fuel cell holes not detected during processing</div>
+                    <div class="timeline-col status">
+                        <span class="status-badge fail">FAIL</span>
+                    </div>
+                    <div class="timeline-col actions">
+                        <button class="action-button"><i class="fas fa-info-circle"></i></button>
+                        <button class="action-button"><i class="fas fa-camera"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Event 2 -->
+                <div class="timeline-row">
+                    <div class="timeline-col timestamp">
+                        <div class="date">2023-12-15</div>
+                        <div class="time">09:42:08</div>
+                    </div>
+                    <div class="timeline-col event-type">
+                        <span class="event-badge warning">Warning</span>
+                    </div>
+                    <div class="timeline-col component">Flaps</div>
+                    <div class="timeline-col description">Flaps detected in closed position</div>
+                    <div class="timeline-col status">
+                        <span class="status-badge warning">WARNING</span>
+                    </div>
+                    <div class="timeline-col actions">
+                        <button class="action-button"><i class="fas fa-info-circle"></i></button>
+                        <button class="action-button"><i class="fas fa-camera"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Event 3 -->
+                <div class="timeline-row">
+                    <div class="timeline-col timestamp">
+                        <div class="date">2023-12-15</div>
+                        <div class="time">09:40:35</div>
+                    </div>
+                    <div class="timeline-col event-type">
+                        <span class="event-badge info">Status</span>
+                    </div>
+                    <div class="timeline-col component">System</div>
+                    <div class="timeline-col description">Processing started for batch #A12345</div>
+                    <div class="timeline-col status">
+                        <span class="status-badge info">INFO</span>
+                    </div>
+                    <div class="timeline-col actions">
+                        <button class="action-button"><i class="fas fa-info-circle"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Event 4 -->
+                <div class="timeline-row">
+                    <div class="timeline-col timestamp">
+                        <div class="date">2023-12-15</div>
+                        <div class="time">09:15:22</div>
+                    </div>
+                    <div class="timeline-col event-type">
+                        <span class="event-badge success">Success</span>
+                    </div>
+                    <div class="timeline-col component">All Components</div>
+                    <div class="timeline-col description">Batch #A12344 completed successfully</div>
+                    <div class="timeline-col status">
+                        <span class="status-badge pass">PASS</span>
+                    </div>
+                    <div class="timeline-col actions">
+                        <button class="action-button"><i class="fas fa-info-circle"></i></button>
+                        <button class="action-button"><i class="fas fa-camera"></i></button>
+                        <button class="action-button"><i class="fas fa-file-download"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Event 5 -->
+                <div class="timeline-row">
+                    <div class="timeline-col timestamp">
+                        <div class="date">2023-12-15</div>
+                        <div class="time">08:52:10</div>
+                    </div>
+                    <div class="timeline-col event-type">
+                        <span class="event-badge maintenance">Maintenance</span>
+                    </div>
+                    <div class="timeline-col component">System</div>
+                    <div class="timeline-col description">Calibration check performed</div>
+                    <div class="timeline-col status">
+                        <span class="status-badge pass">COMPLETE</span>
+                    </div>
+                    <div class="timeline-col actions">
+                        <button class="action-button"><i class="fas fa-info-circle"></i></button>
+                        <button class="action-button"><i class="fas fa-file-download"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <button class="pagination-button disabled"><i class="fas fa-chevron-left"></i></button>
+            <button class="pagination-number active">1</button>
+            <button class="pagination-number">2</button>
+            <button class="pagination-number">3</button>
+            <span class="pagination-ellipsis">...</span>
+            <button class="pagination-number">12</button>
+            <button class="pagination-button"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+</body>
+</html>

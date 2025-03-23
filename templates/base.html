@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <title>{% block title %}Fuel Cell Monitoring System{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Animate.css for subtle animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+          <i class="fas fa-bolt me-2"></i>FuelCell Monitor
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}" href="{{ url_for('index') }}">
+                <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == url_for('analytics') %}active{% endif %}" href="{{ url_for('analytics') }}">
+                <i class="fas fa-chart-line me-1"></i> Analytics
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == url_for('history') %}active{% endif %}" href="{{ url_for('history') }}">
+                <i class="fas fa-history me-1"></i> History
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == url_for('settings') %}active{% endif %}" href="{{ url_for('settings') }}">
+                <i class="fas fa-cog me-1"></i> Settings
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- Animated Background Elements -->
+    <div class="animated-bg">
+      <div class="blob"></div>
+      <div class="blob"></div>
+      <div class="blob"></div>
+    </div>
+    
+    <div class="container">
+      <!-- Header -->
+      <div class="page-header">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h1 class="page-title animate__animated animate__fadeInUp animate__faster">{% block page_title %}{% endblock %}</h1>
+            <p class="page-subtitle animate__animated animate__fadeInUp animate__fast">{% block page_subtitle %}{% endblock %}</p>
+          </div>
+          <div class="col-md-4 text-md-end">
+            <div class="timestamp animate__animated animate__fadeInRight">
+              <i class="far fa-clock"></i>
+              <span class="time-display" id="current-time">00:00:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {% block content %}{% endblock %}
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p class="footer-text">
+              &copy; 2025 Fuel Cell Monitoring Systems. All Rights Reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Common JS -->
+    <script>
+      // Update the clock
+      function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+      }
+      
+      // Initialize
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize clock
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+              behavior: 'smooth'
+            });
+          });
+        });
+        
+        // Add fade-in effect to cards 
+        const fadeElements = document.querySelectorAll('.card, .status-card, .sensor-card');
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('fade-in');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        
+        fadeElements.forEach(element => {
+          observer.observe(element);
+        });
+      });
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>
